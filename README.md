@@ -7,21 +7,25 @@ opening the file `docs/index.html` in your web browser.
 
 # Sample Project
 
-Checkout our sample project `CKExample` for a simple working example of 
+Checkout our sample project `TLKitExample` for a simple working example of 
 how developers can use `TLKit`.
 
 # Integrating TLKit framework into a project
 
 ## Option 1: CocoaPods
 
-We recommand installing `TLKit` using [CocoaPods](http://cocoapods.org/), which provides a simple dependency management system that automates the error-prone process of manually configuring libraries. First make sure you have `CocoaPods` installed (you will also need to have Ruby installed):
+We recommand installing `TLKit` using [CocoaPods](http://cocoapods.org/), which 
+provides a simple dependency management system that automates the error-prone 
+process of manually configuring libraries. First make sure you have `CocoaPods` 
+installed (you will also need to have Ruby installed):
 
 ```
 sudo gem install cocoapods
 pod setup
 ```
 
-Now create an empty file in the root of your project directory, and name it `Podfile` or just run the following command:
+Now create an empty file in the root of your project directory, and name it 
+`Podfile` or just run the following command:
 
 ```
 pod init
@@ -41,16 +45,25 @@ pod 'TLKit'
 ...
 ```
 
-Finally, save and close the `Podfile` and run `pod install` to setup your `CocoaPods` environment and import `TLKit` into your project. Make sure to start working from the `.xcworkspace` file that `CocoaPods` automatically creates, not the `.xcodeproj` you may have had open.
+Finally, save and close the `Podfile` and run `pod install` to setup your 
+`CocoaPods` environment and import `TLKit` into your project. Make sure to start 
+working from the `.xcworkspace` file that `CocoaPods` automatically creates, not
+ the `.xcodeproj` you may have had open.
 
 That's it! You can start coding!
 
 ## Option 2: Manual installation
 
-Instructions provided by Apple for adding an existing framework can be found 
-[here](https://developer.apple.com/library/ios/recipes/xcode_help-structure_navigator/articles/Adding_a_Framework.html).
+While Cocoapods are the recommended method for Adding TLKit to a project it can
+also be adde. This also requires manually adding it's dependent frameworks, 
+configuring linking, and configuring background modes. 
 
-The `TLKit.framework` can also be dragged into an XCode project.
+### Adding the TLKit framework
+A zip file containing the framework can be downloaded from 
+[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-9.0.17061900.zip).
+Once unzipped the file can be added to an existing project by dragging the 
+framework into that project, or following the 
+[instructions provided Apple](https://developer.apple.com/library/ios/recipes/xcode_help-structure_navigator/articles/Adding_a_Framework.html).
 
 ### Dependent frameworks
 
@@ -72,10 +85,14 @@ For each target using `TLKit`, in the configuration under
 `Build Settings > Other Linker Flags` make sure the following flags are 
 set `-lm -all_load -ObjC`
 
-If you see a lot of errors related to linking, it is possible that 
+If you see errors related to linking, it is possible that 
 `libc++` is not being linked for you. To solve this either change one 
 file extension from `.m` to `.mm` or add a new empty `c++` file to the 
 project.
+
+If you see errors related to duplicated symbols or similar linking 
+errors this could be caused by the above linking flags. In this case just try 
+to replace `-lm -all_load -ObjC` with `-force_load TLKit.framework/Versions/A/TLKit`
 
 ## Configure Background Modes
 
@@ -84,70 +101,77 @@ Under `Capabilities > Background Modes` check the box next to
 
 # Using TLKit
 
-The heart of the `TLKit` is the Context Engine named `CKContextKit`. The engine needs to 
-be initialized with a registered user in order to use any of its 
-features. 
+The heart of the TLKit is the Context Engine. The engine needs to 
+be initialized with some user information and a drive detection mode in order to
+use any of its features. 
 
-## Registering and authenticating users.
+## User information 
 
-`CKContextKit` needs to be started in order to use any of its features and
-starting `CKContextKit` requires an authentication token from the `TLKit`
-server.
+There are two types of user information that can be used to initialize the 
+engine: 
+  1. A SHA-256 hash of some user id. Currently only hashes of emails are allowed
+  but other TL approved ids could be used.
+  2. An application specific username and password. 
+  
+The first type of user info is appropriate for cases where the SDK is used only
+for data collection. The second type is useful in cases where the application 
+wants to access the per user information and provide password protected access
+to it to it's users. 
 
-In a production environment authentication should be done between the
-Application Server and the `TLKit` server. This will prevent the API
-secret from being leaked out as part of SSL proxying attack on the mobile 
-device. See the Data Services API on how to register and authenticate a 
-user.
+## Automatic and manual modes
 
-For initial integration and evaluation purposes we provide user 
-registration and authentication services in the SDK. To register 
-a user use do the following:
+The engine can be initialized for either automatic drive detection where the SDK
+will automatically detect and monitor drives or a manual drive detection where 
+the SDK will only monitor drives when explicitly told to by the application.
 
-Starting and stopping the SDK is documented in the next section.
+The first mode is useful in cases where the user is not interacting with the 
+application to start and end drives. While the second mode is useful when the 
+user will explicitly start and end drives in the application.
 
-## Starting, Stopping CKContextKit
+## Example initialization with SHA-256 hash in automatic mode
+The below examples demonstrate initialization with just a SHA-256 hash. The 
+example application provides code for generating this hash.
 
-For evaluation purposes we provide the `simpleInitWithApiKey:` method which 
-registers with the server on behalf of the developer, this is an 
-insecure method of registration and a production implementation would 
-use the regular `initWithApiKey` method.
-
-An example of initializing the engine is provided here:
+Once started in this mode the engine is able to automatically detect and record 
+all drives.
 
 ```objc 
-#import <TLKit/CKContextKit.h>
-...
+__weak __typeof__(self) weakSelf = self;
+[CKContextKit initWithApiKey:API_KEY
+                    hashedId:[self hashedId:@"iosexample@tourmalinelabs.com"]
+                   automatic:YES // set to `NO` for manual mode 
+                    launchOptions:nil
+                withResultToQueue:dispatch_get_main_queue()
+                      withHandler:^(BOOL __unused successful,
+                          NSError * _Nullable error) {
+                          if (error) {
+                              NSLog(@"Failed to start TLKit: %@", error);
+                              return;
+                          }
+                      }];
+```
 
-[CKContextKit simpleInitWithApiKey:@"apiKey" 
-                              user:@"foouser@bw.io"
-                              pass:@"password"
-                     launchOptions:nil
-                 withResultToQueue:dispatch_get_main_queue()
-                       withHandler:^(BOOL successful, NSError *error) {
-                           if (error) {
-                               NSLog(@"Failed to start ContextKit with error: %@",
-                                   error);
-                               return;
-                           }
-                           NSLog(@"Started ContextKit!");
-                           ...
-                       }];
-```     
 
-`CKContextKit` attempts to validate permissions and see other necessary 
-conditions are met when starting the engine. If any of these conditions 
-are not met it will fail with an `error` that can be used to debug the 
-issue.
+## Trouble shooting
+At initialization, `CKContextKit` attempts to validate  permissions and see 
+other necessary conditions are met when initializing the engine. If any of these
+conditions are not met it will fail with an `error` that can be used to debug 
+the issue.
 
 One example of where a failure would occur would be location permissions
 not being enabled for the application.
 
-`CKContextKit` can be stopped when it is not needed as follows:
+### Destroying an engine.
+
+Once initialized there is no reason to destroy the engine unless you need to 
+set a new `CKAuthenticationManagerDelegate` for a different user or password. Or In
+those cases, the engine can be destroyed as follows:
+
+`CKContextKit` can be destroyed as follows
 
 ```objc
-[CKContextKit stopWithResultToQueue:dispatch_get_main_queue()
-                        withHandler:^(BOOL successful, NSError *error) {
+[CKContextKit destroyWithResultToQueue:dispatch_get_main_queue()
+                           withHandler:^(BOOL successful, NSError *error) {
                             if (error) {
                                 NSLog(@"Stopping Contextkit Failed: %@", 
                                     error);
@@ -161,7 +185,7 @@ not being enabled for the application.
 
 `CKContextKit` utilizes GPS as one of it's context sensor. As such it is 
 best practice to request "Always" authorization from the user for 
-accesssing location prior to starting the engine.
+accesssing location prior to initializing the engine.
 
 ## Drive Monitoring
 
@@ -172,22 +196,44 @@ Drive monitoring functionality is accessed through the
 self.actMgr = [CKActivityManager new];
 ```
 
-### Starting, Stopping drive monitoring
+### Starting and stopping manual drives
+
+If the engine was initialized into manual mode, drives can be started and 
+stopped as follows.
+
+```objc
+NSUUID* driveId = [self.activityManager startManualTrip];
+```
+
+```objc
+[self.activityManager stopManualTrip: driveId];
+```
+
+Multiple overlapping manual drives can be started at the same time.
+
+
+### Registering a drive event listener
+
+The application can register to receive drive start, update and events as 
+follows.
 
 Register a listener with the drive monitoring service as follows.
 
 ```objc
-[self.actMgr 
-    startDriveMonitoringWithTelematicsToQueue:dispatch_get_main_queue()
-                                  withHandler:^(CKActivityEvent *evt, NSError * err) {
-                                      // Update UI
-                                      [weakSelf updateDataSource];
-                                      NSLog(@"Drive event: %@", evt);
-                                  }];
+[self.activityManager 
+    listenForDriveEventsToQueue:dispatch_get_main_queue()
+                    withHandler:^(CKActivityEvent * _Nullable evt, 
+                        NSError * _Nullable error) {
+                                          
+                        // handle error
+                        if (error) {
+                            NSLog(@"Failed to register lstnr: %@", error);
+                            return;
+                        }
+                                          
+                        NSLog(@"New CKActivityEvent: %@", evt);
+                    }];
 ```
-
-If this is the first registration by your app it will start drive 
-monitoring.
 
 _Note_: multiple drive events may be received for the same drive as the drive 
 progresses and the drive processing updates the drive with more accurate map 
@@ -196,11 +242,8 @@ points.
 Drive events can be stopped as follows
 
 ```objc
-[self.actMgr stopDriveMonitoring];
+[self.actMgr stopListeningForDriveEvents];
 ```
-
-If this was the last registration by your app it will stop drive 
-monitoring.
 
 ### Querying previous drives 
 Once started all drives will be recorded for querying either by date:
@@ -270,9 +313,6 @@ A listener can be unregistered as follows:
 [locMgr stopUpdatingLocation];
 ```    
 
-`TLKit` will monitor all location activity of the device while at
-least one listener is registered. If no listeners are registered locations
-will not be tracked or recorded.
 
 ### Querying location history
 
@@ -293,12 +333,19 @@ will not be tracked or recorded.
 _Note_: This will only include locations that were recorded while a listener
 was registered as stated in the previous section.
 
-## Fleet management
+# Trouble Shooting
 
-`TLKit` also provides some powerful fleet management tools available 
-through `CKFleetManager`. 
+## Out of date TLKit Cocoapod
+Errors like 
+```
+No visible @interface for 'CKActivityManager' declares the selector 'stopManualTrip:'
+```
+or
+```
+No known class method for selector 'initAutomaticWithApiKey:authMgr:launchOptions:withResultToQueue:withHandler:'
+```
+Your TLKit Cocoapod is out of date it can be updated as follows:
 
-To manage drivers they must be registered and part of at least one 
-group. Simple registration is covered above. Accepting invitations, 
-joning groups, leaving groups, configuring vehicle classes and duty 
-schedules can all be done via the `CKFleetManager` class.
+```bash
+pod update TLKit
+```
