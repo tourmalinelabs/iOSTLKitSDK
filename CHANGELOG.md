@@ -1,5 +1,8 @@
 # TLKit Change Log
 
+## 9.0.17062800
+* Stability and bug fixes.
+
 ## 9.0.17061900
 * SHA-256 hashes of emails now supported as user ids.
 * Reworked  `CKContextKit` `init` methods remove need for standalone authorization 
