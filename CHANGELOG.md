@@ -1,5 +1,8 @@
 # TLKit Change Log
 
+## 9.1.17072100
+* Improved stability.
+
 ## 9.1.17071700
 * Improved stability.
 * Reduced network usage.
