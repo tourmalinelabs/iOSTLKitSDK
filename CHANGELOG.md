@@ -1,5 +1,11 @@
 # TLKit Change Log
 
+## 10.0.17081400
+* Despite major version bump there is no backwards compatibility changes.
+* Significant improvement in routing algorithms.
+* Stability improvements.
+* Fixed bug where trip distance wasn't updated until the trip was complete. 
+
 ## 9.1.17072100
 * Improved stability.
 
