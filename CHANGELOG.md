@@ -1,5 +1,8 @@
 # TLKit Change Log
 
+## 10.1.17082500
+* Improved stability.
+
 ## 10.0.17081400
 * Despite major version bump there is no backwards compatibility changes.
 * Significant improvement in routing algorithms.
