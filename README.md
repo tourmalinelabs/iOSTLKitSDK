@@ -34,8 +34,8 @@ pod init
 Open and edit the `Podfile` as follow:
 
 ```ruby
-source 'https://github.com/CocoaPods/Specs.git'
 source 'https://github.com/tourmalinelabs/iOSTLKitSDK.git'
+source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '9.0'
 
@@ -44,6 +44,9 @@ use_frameworks!
 pod 'TLKit'
 ...
 ```
+
+_Note_:  sources declaration order matters. To avoid pod conflicts with other public
+repositories, please ensure to declare `https://github.com/tourmalinelabs/iOSTLKitSDK.git` first.
 
 Finally, save and close the `Podfile` and run `pod install` to setup your 
 `CocoaPods` environment and import `TLKit` into your project. Make sure to start 
@@ -60,7 +63,7 @@ configuring linking, and configuring background modes.
 
 ### Adding the TLKit framework
 A zip file containing the framework can be downloaded from 
-[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-10.3.17110301.zip).
+[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-11.0.17120500.zip).
 Once unzipped the file can be added to an existing project by dragging the 
 framework into that project, or following the 
 [instructions provided Apple](https://developer.apple.com/library/ios/recipes/xcode_help-structure_navigator/articles/Adding_a_Framework.html).
@@ -129,6 +132,7 @@ application to start and end drives. While the second mode is useful when the
 user will explicitly start and end drives in the application.
 
 ## Example initialization with SHA-256 hash in automatic mode
+
 The below examples demonstrate initialization with just a SHA-256 hash. The 
 example application provides code for generating this hash.
 
@@ -142,8 +146,8 @@ __weak __typeof__(self) weakSelf = self;
                    automatic:YES // set to `NO` for manual mode 
                     launchOptions:nil
                 withResultToQueue:dispatch_get_main_queue()
-                      withHandler:^(BOOL __unused successful,
-                          NSError * _Nullable error) {
+                      withHandler:^(BOOL successful,
+                          NSError *error) {
                           if (error) {
                               NSLog(@"Failed to start TLKit: %@", error);
                               return;
@@ -206,7 +210,7 @@ NSUUID* driveId = [self.activityManager startManualTrip];
 ```
 
 ```objc
-[self.activityManager stopManualTrip: driveId];
+[self.actMgr stopManualTrip: driveId];
 ```
 
 Multiple overlapping manual drives can be started at the same time.
@@ -220,11 +224,9 @@ follows.
 Register a listener with the drive monitoring service as follows.
 
 ```objc
-[self.activityManager 
+[self.actMgr
     listenForDriveEventsToQueue:dispatch_get_main_queue()
-                    withHandler:^(CKActivityEvent * _Nullable evt, 
-                        NSError * _Nullable error) {
-                                          
+                    withHandler:^(CKActivityEvent *evt, NSError *error) {
                         // handle error
                         if (error) {
                             NSLog(@"Failed to register lstnr: %@", error);
@@ -245,7 +247,8 @@ Drive events can be stopped as follows
 [self.actMgr stopListeningForDriveEvents];
 ```
 
-### Querying previous drives 
+### Querying previous drives
+
 Once started all drives will be recorded for querying either by date:
 
 ```objc
@@ -267,14 +270,75 @@ or by id:
 
 ```objc    
 NSUUID *driveId = ...;
-[actMgr queryDriveById:driveId
-               toQueue:dispatch_get_main_queue() 
-           withHandler:^(NSArray *drives, NSError *err) {
-               if (!error) {
-                   NSLog(@"Found drive %@", drives[0]);
-               }
-           }];
+[self.actMgr queryDriveById:driveId
+                    toQueue:dispatch_get_main_queue()
+                withHandler:^(NSArray *drives, NSError *err) {
+                    if (!error) {
+                        NSLog(@"Found drive %@", drives[0]);
+                    }
+                }];
 ```   
+
+## Telematics monitoring
+
+Telematics monitoring functionality is accessed through the `CKActivityManager` as well.
+(see Drive monitoring above).
+
+### Registering a telematics event listener
+
+The application can register to receive telematics events as follows.
+
+```objc
+[self.actMgr
+    listenForTelematicsEventsToQueue:dispatch_get_main_queue()
+                         withHandler:^(CKTelematicsEvent *evt,
+                            NSError *error) {
+                            if (error) {
+                                NSLog(@"Telematics event failed with error %@",
+                                    error);
+                            } else {
+                                NSLog(@"Telematics event: %@",
+                                    evt.description);
+                            }
+                        }];
+```
+
+_Note_: like for the drive monitoring multiple telematics events may be received for the same
+drive.
+
+Telematics events can be stopped as follows
+
+```objc
+[self.actMgr stopListeningForTelematicsEvents];
+```
+
+### Querying previous telematics events
+
+Query previous telematics events as follows.
+
+```objc
+#import <TLKit/CKContextKit.h>
+...
+[self.actMgr
+    queryTelematicsEventsFromDate:[NSDate distantPast]
+                           toDate:[NSDate distantFuture]
+                             page:1
+                   resultsPerPage:50
+                          toQueue:dispatch_get_main_queue()
+                          withHandler:^(NSUInteger currentPage,
+                            NSUInteger pageCount,
+                            NSUInteger resultCount,
+                            NSArray *results,
+                            NSError *error) {
+                                if (error) {
+                                    NSLog(@"Telematics query failed with error %@",
+                                        error);
+                                } else {
+                                    NSLog(@"Got telematics events: %@",
+                                        results);
+                                }
+                            }];
+```
 
 ## Low power location monitoring
 

@@ -1,5 +1,9 @@
 # TLKit Change Log
 
+## 11.0.17120500
+* Telematics events monitoring.
+* Improved stability.
+
 ## 10.3.17110301
 * Improved stability.
 
