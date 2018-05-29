@@ -1,5 +1,8 @@
 # TLKit Change Log
 
+## 11.6.18052500
+* Improved stability.
+
 ## 11.0.17121500
 * Improved stability.
 
@@ -23,7 +26,7 @@
 * Despite major version bump there is no backwards compatibility changes.
 * Significant improvement in routing algorithms.
 * Stability improvements.
-* Fixed bug where trip distance wasn't updated until the trip was complete. 
+* Fixed bug where trip distance wasn't updated until the trip was complete.
 
 ## 9.1.17072100
 * Improved stability.
@@ -37,13 +40,13 @@
 
 ## 9.0.17061900
 * SHA-256 hashes of emails now supported as user ids.
-* Reworked  `CKContextKit` `init` methods remove need for standalone authorization 
+* Reworked  `CKContextKit` `init` methods remove need for standalone authorization
   manager, eliminates seperate methods for starting in manual or automatic
   drive detection:
 
 ## 8.1.17051700
 * Manual monitoring support
-  * `CKContextKit` `initWithApiKey` becomes `initAutomaticWithApiKey` 
+  * `CKContextKit` `initWithApiKey` becomes `initAutomaticWithApiKey`
   * New init method is added: `initManualWithApiKey`
 * Route computation improvements
 * Battery usage optimizations
