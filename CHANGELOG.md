@@ -1,5 +1,8 @@
 # TLKit Change Log
 
+## 12.0.18061800
+* Improved stability.
+
 ## 11.6.18052901
 * Improved stability.
 
