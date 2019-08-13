@@ -63,7 +63,7 @@ configuring linking, and configuring background modes.
 
 ### Adding the TLKit framework
 A zip file containing the framework can be downloaded from
-[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-12.0.18061800.zip).
+[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-14.4.19080901.zip).
 Once unzipped the file can be added to an existing project by dragging the
 framework into that project, or following the
 [instructions provided Apple](https://developer.apple.com/library/ios/recipes/xcode_help-structure_navigator/articles/Adding_a_Framework.html).
@@ -142,17 +142,16 @@ all drives.
 ```objc
 __weak __typeof__(self) weakSelf = self;
 [CKContextKit initWithApiKey:API_KEY
-                    hashedId:[self hashedId:@"iosexample@tourmalinelabs.com"]
-                   automatic:YES // set to `NO` for manual mode
-                    launchOptions:nil
-                withResultToQueue:dispatch_get_main_queue()
-                      withHandler:^(BOOL successful,
-                          NSError *error) {
-                          if (error) {
-                              NSLog(@"Failed to start TLKit: %@", error);
-                              return;
-                          }
-                      }];
+     hashedId:[self hashedId:@"iosexample@tourmalinelabs.com"]
+                        mode:CKMonitoringModeAutomatic
+               launchOptions:nil
+           withResultToQueue:dispatch_get_main_queue()
+                 withHandler:^(BOOL successful, NSError *error) {
+                     if (error) {
+                         NSLog(@"Failed to start TLKit: %@", error);
+                         return;
+                     }
+                 }];
 ```
 
 
@@ -177,7 +176,7 @@ those cases, the engine can be destroyed as follows:
 [CKContextKit destroyWithResultToQueue:dispatch_get_main_queue()
                            withHandler:^(BOOL successful, NSError *error) {
                             if (error) {
-                                NSLog(@"Stopping Contextkit Failed: %@",
+                                NSLog(@"Stopping ContextKit Failed: %@",
                                     error);
                                 return;
                             }
@@ -312,32 +311,27 @@ Telematics events can be stopped as follows
 [self.actMgr stopListeningForTelematicsEvents];
 ```
 
-### Querying previous telematics events
+### Querying telematics events for a specific drive
 
-Query previous telematics events as follows.
+Query telematics events for a specific drive as follows.
 
 ```objc
 #import <TLKit/CKContextKit.h>
 ...
+NSUUID *driveId = ...;
 [self.actMgr
-    queryTelematicsEventsFromDate:[NSDate distantPast]
-                           toDate:[NSDate distantFuture]
-                             page:1
-                   resultsPerPage:50
-                          toQueue:dispatch_get_main_queue()
-                          withHandler:^(NSUInteger currentPage,
-                            NSUInteger pageCount,
-                            NSUInteger resultCount,
-                            NSArray *results,
-                            NSError *error) {
-                                if (error) {
-                                    NSLog(@"Telematics query failed with error %@",
-                                        error);
-                                } else {
-                                    NSLog(@"Got telematics events: %@",
-                                        results);
-                                }
-                            }];
+    queryTelematicsEventsForTrip:driveId
+                         toQueue:dispatch_get_main_queue()
+                     withHandler:^(NSArray *results, NSError *error) {
+                         if (error) {
+                             NSLog(@"Telematics query failed with error %@",
+                                 error);
+                         } else {
+                             NSLog(@"Got telematics events: %@",
+                                 results);
+                         }
+                     }];
+
 ```
 
 ## Low power location monitoring
