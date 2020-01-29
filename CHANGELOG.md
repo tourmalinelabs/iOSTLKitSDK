@@ -1,5 +1,10 @@
 # TLKit Change Log
 
+## 15.3.20012800
+* Improved stability.
+* Added the ability to start a single manual drive.
+* Added the ability to end all manual drives.
+
 ## 15.0.19110600
 * Improved stability.
 
