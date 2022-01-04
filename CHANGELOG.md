@@ -1,5 +1,9 @@
 # TLKit Change Log
 
+## 17.4.21122400
+* Improved stability.
+* Fixes a race condition while changing drive monitoring state.
+
 ## 17.4.21111500
 * Improved stability.
 
