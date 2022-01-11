@@ -140,9 +140,10 @@ Once started in this mode the engine is able to automatically detect and record
 all drives.
 
 ```objc
-__weak __typeof__(self) weakSelf = self;
+NSString *hashedId = [self hashedId:@"iosexample@tourmalinelabs.com"];
+
 [CKContextKit initWithApiKey:API_KEY
-     hashedId:[self hashedId:@"iosexample@tourmalinelabs.com"]
+                    hashedId:hashedId
                         mode:CKMonitoringModeAutomatic
                launchOptions:nil
            withResultToQueue:dispatch_get_main_queue()
@@ -187,8 +188,21 @@ those cases, the engine can be destroyed as follows:
 ### Pre-authorize Location Manager access
 
 `CKContextKit` utilizes GPS as one of it's context sensor. As such it is
-best practice to request "Always" authorization from the user for
-accesssing location prior to initializing the engine.
+best practice to request "Always" authorization from
+the user for accesssing location prior to initializing the engine.
+
+_Note_: iOS 14 introduced location permissions precise vs. approximate location.
+This is necessary to have Precise Locations allowed to record drives.
+
+### Pre-authorize Motion & Fitness access
+
+`CKContextKit` uses Motion & Fitness data to:
+- Improve drive start and end detection.
+- Increase driving behavior event accuracy.
+- Reduce battery consumption.
+
+Although this is not mandatory this is highly recommended to request
+Motion & Fitness authorization prior to initializing the engine.
 
 ## Drive Monitoring
 
@@ -205,7 +219,7 @@ If the engine was initialized into manual mode, drives can be started and
 stopped as follows.
 
 ```objc
-NSUUID* driveId = [self.activityManager startManualTrip];
+NSUUID *driveId = [self.activityManager startManualTrip];
 ```
 
 ```objc
