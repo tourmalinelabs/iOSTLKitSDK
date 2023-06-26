@@ -1,5 +1,13 @@
 # TLKit Change Log
 
+## 22.1.23062602
+* Added support of XCFramework with arm64 simulator.
+* Improved stability.
+
+## 22.0.23060200
+* TLKit renaming and refactoring (see MIGRATION.md guide)
+* Improved stability.
+
 ## 17.4.22052301
 * Improved stability.
 
