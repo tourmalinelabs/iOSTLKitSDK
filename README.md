@@ -245,6 +245,14 @@ the user for accesssing location prior to initializing `TLKit`.
 _Note_: iOS 14 introduced location permissions precise vs. approximate location.
 This is necessary to have Precise Locations allowed to record trips.
 
+The host application must enable the Wi-Fi Information capability to allow the SDK to access Wi-Fi network details (SSID, BSSID, etc.).
+Add the `Access Wifi Information` capability or add the following key to your app’s Entitlements.plist file:
+
+```xml
+<key>com.apple.developer.networking.wifi-info</key>
+<true/>
+```
+
 ### Pre-authorize Motion & Fitness access
 
 `TLKit` uses Motion & Fitness data to:
